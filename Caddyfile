@@ -1,0 +1,12 @@
+www.ancc.blog {
+	redir https://ancc.blog{uri} 308
+}
+
+ancc.blog {
+	root * /srv/ancc-blog
+	file_server
+}
+
+golf.ancc.blog {
+	reverse_proxy 127.0.0.1:8000
+}
