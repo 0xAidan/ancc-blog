@@ -1,11 +1,23 @@
 # ancc.blog
 
-Minimal landing page for `ancc.blog` with a clean golf app URL on `golf.ancc.blog`.
+Landing page for **Aidan Nugent Consulting Company** — a typography-first, terminal-minimal static site listing projects (Ditto, Golf Model).
 
 ## What this repo contains
 
-- `index.html` - bare-minimum homepage
-- `Caddyfile` - HTTPS + routing config
+- `index.html` — homepage (embedded CSS, single-file deploy)
+- `deploy.sh` — copy `index.html` to the live server
+- `Caddyfile` — HTTPS + routing config
+
+## Deploy changes
+
+After merging a PR, publish to the live site:
+
+```bash
+chmod +x deploy.sh   # first time only
+./deploy.sh
+```
+
+This copies `index.html` to `golf-vps:/srv/ancc-blog/`. Caddy serves it immediately — no build step.
 
 ## DNS setup in Porkbun
 
