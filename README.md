@@ -1,71 +1,51 @@
 # ancc.blog
 
-Landing page for **Aidan Nugent Consulting Company** — a typography-first, terminal-minimal static site listing projects (Ditto, Golf Model).
+Landing page for **Aidan Nugent Consulting Company** — editorial terminal with live project stats, interactive shell, and dashboard panels.
 
-## What this repo contains
+## Stack
 
-- `index.html` — homepage (embedded CSS, single-file deploy)
-- `deploy.sh` — copy `index.html` to the live server
-- `Caddyfile` — HTTPS + routing config
+- Vite + TypeScript (static build)
+- **Italiana** (hero) + **Cutive Mono** (body/terminal)
+- Deployed to Hetzner via Caddy (`file_server`)
 
-## Deploy changes
-
-After merging a PR, publish to the live site:
+## Local development
 
 ```bash
-chmod +x deploy.sh   # first time only
+npm install
+npm run dev
+```
+
+Open http://localhost:5173
+
+## Deploy
+
+```bash
 ./deploy.sh
 ```
 
-This copies `index.html` to `golf-vps:/srv/ancc-blog/`. Caddy serves it immediately — no build step.
+Runs `npm run build` and copies `dist/*` to `golf-vps:/srv/ancc-blog/`.
 
-## DNS setup in Porkbun
+## Terminal commands
 
-Create these DNS records:
+| Command | Description |
+| ------- | ----------- |
+| `help` | List commands |
+| `projects` / `ls` | List projects |
+| `open ditto` / `open golf` | Navigate to project |
+| `status` | Health check both projects |
+| `stats` | Live stats for Ditto + Golf |
+| `ditto stats` / `golf stats` | Single project stats |
+| `refresh` | Bust cache and re-fetch |
+| `dashboard` / `dashboard hide` | Toggle stat panels |
+| `clear` | Clear terminal |
+| `about`, `whoami`, `banner`, `sudo` | Easter eggs |
 
-- `A` record for `@` -> your Hetzner server IPv4
-- `A` record for `www` -> your Hetzner server IPv4
-- `A` record for `golf` -> your Hetzner server IPv4
+## Live stats (CORS)
 
-Wait for DNS to propagate (often a few minutes, sometimes longer).
+Stats fetch from `ditto.jungle.win` and `golf.ancc.blog`. Golf requires CORS allowlist for `https://ancc.blog` (see `golf-model/app.py`). Ditto allows cross-origin reads via existing `cors()` middleware.
 
-## Server setup on Hetzner (Ubuntu/Debian)
+## What this repo contains
 
-1) Install Caddy:
-
-```bash
-sudo apt update
-sudo apt install -y caddy
-```
-
-2) Copy site files to the server:
-
-```bash
-sudo mkdir -p /srv/ancc-blog
-sudo cp index.html /srv/ancc-blog/index.html
-```
-
-3) Install Caddy config:
-
-```bash
-sudo cp Caddyfile /etc/caddy/Caddyfile
-sudo caddy fmt --overwrite /etc/caddy/Caddyfile
-sudo systemctl restart caddy
-sudo systemctl status caddy --no-pager
-```
-
-4) Make sure your golf app is running on:
-
-`127.0.0.1:8000`
-
-If it currently runs on `0.0.0.0:8000`, that still works, but `127.0.0.1` is safer when reverse proxied.
-
-## Verify
-
-```bash
-curl -I https://ancc.blog
-curl -I https://golf.ancc.blog
-```
-
-Both should return successful HTTP status codes (for example `200`).
-
+- `src/` — Vite app (shell, dashboard, stats client)
+- `deploy.sh` — build + publish to VPS
+- `Caddyfile` — HTTPS routing for ancc.blog + golf.ancc.blog
