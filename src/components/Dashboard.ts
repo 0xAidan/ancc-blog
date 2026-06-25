@@ -84,16 +84,35 @@ export const updateDashboard = (
   golf: GolfStats,
   fetchedAt: number,
 ): void => {
-  els.dittoPrimary.textContent = `${fmt(ditto.agents)} agents`;
-  els.dittoSecondary.textContent = `${fmt(ditto.walletsScored)} wallets scored`;
+  if (ditto.agents === null && ditto.walletsScored === null) {
+    els.dittoPrimary.textContent =
+      ditto.status === "down" ? "Stats unavailable" : "Loading stats…";
+    els.dittoSecondary.textContent = "";
+  } else {
+    els.dittoPrimary.textContent =
+      ditto.agents !== null ? `${ditto.agents} agents` : "Loading agents…";
+    els.dittoSecondary.textContent =
+      ditto.walletsScored !== null
+        ? `${ditto.walletsScored} wallets scored`
+        : "Loading wallet data…";
+  }
   els.dittoTertiary.textContent =
     ditto.tierAlpha !== null
       ? `α ${fmt(ditto.tierAlpha)} · whale ${fmt(ditto.tierWhale)}`
       : "";
 
-  els.golfPrimary.textContent =
-    golf.winRate !== null ? `${golf.winRate}% win rate` : "No graded picks yet";
-  els.golfSecondary.textContent = `${fmt(golf.picksGraded)} picks graded`;
+  if (golf.status === "down") {
+    els.golfPrimary.textContent = "Stats unavailable";
+    els.golfSecondary.textContent = "Could not reach golf.ancc.blog";
+  } else if (golf.winRate === null && (golf.picksGraded === null || golf.picksGraded === 0)) {
+    els.golfPrimary.textContent = "No graded picks yet";
+    els.golfSecondary.textContent = "";
+  } else {
+    els.golfPrimary.textContent =
+      golf.winRate !== null ? `${golf.winRate}% win rate` : "Loading win rate…";
+    els.golfSecondary.textContent =
+      golf.picksGraded !== null ? `${golf.picksGraded} picks graded` : "";
+  }
   els.golfTertiary.textContent = golf.latestEvent ?? golf.modelName ?? "";
 
   els.dittoUpdated.textContent = `Updated ${formatRelative(fetchedAt)}`;

@@ -126,8 +126,8 @@ const buildPage = (): {
   main.appendChild(header);
   main.appendChild(nav);
   main.appendChild(dashboard.root);
-  main.appendChild(terminalPanel);
   main.appendChild(footer);
+  main.appendChild(terminalPanel);
 
   app.appendChild(skipLink);
   app.appendChild(main);
