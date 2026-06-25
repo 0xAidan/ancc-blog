@@ -2,5 +2,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-scp "${SCRIPT_DIR}/index.html" golf-vps:/srv/ancc-blog/index.html
+cd "${SCRIPT_DIR}"
+
+npm run build
+scp -r dist/* golf-vps:/srv/ancc-blog/
 echo "Deployed → https://ancc.blog"
