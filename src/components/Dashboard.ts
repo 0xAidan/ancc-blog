@@ -130,8 +130,3 @@ export const updateDashboard = (
     history.length < 2,
   );
 };
-
-export const setDashboardVisibility = (root: HTMLElement, visible: boolean): void => {
-  root.hidden = !visible;
-  root.setAttribute("aria-expanded", String(visible));
-};
