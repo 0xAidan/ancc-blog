@@ -3,8 +3,14 @@ www.ancc.blog {
 }
 
 ancc.blog {
-	root * /srv/ancc-blog
-	file_server
+	handle /api/golf/* {
+		uri strip_prefix /api/golf
+		reverse_proxy 127.0.0.1:8000
+	}
+	handle {
+		root * /srv/ancc-blog
+		file_server
+	}
 }
 
 golf.ancc.blog {

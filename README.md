@@ -1,12 +1,12 @@
 # ancc.blog
 
-Landing page for **Aidan Nugent Consulting Company** — editorial terminal with live project stats, interactive shell, and dashboard panels.
+Landing page for **Aidan Nugent Consulting Company** — editorial portfolio with live project stats.
 
 ## Stack
 
 - Vite + TypeScript (static build)
-- **Italiana** (hero) + **Cutive Mono** (body/terminal)
-- Deployed to Hetzner via Caddy (`file_server`)
+- **Italiana** (hero) + **Cutive Mono** (body)
+- Deployed to Hetzner via Caddy
 
 ## Local development
 
@@ -17,35 +17,25 @@ npm run dev
 
 Open http://localhost:5173
 
+Golf stats use a dev proxy (`/api/golf/*` → `golf.ancc.blog/api/*`) configured in `vite.config.ts`.
+
 ## Deploy
 
 ```bash
 ./deploy.sh
 ```
 
-Runs `npm run build` and copies `dist/*` to `golf-vps:/srv/ancc-blog/`.
+Builds the site, copies `dist/*` to the VPS, syncs the `Caddyfile`, and reloads Caddy.
 
-## Terminal commands
+## Live stats
 
-| Command | Description |
-| ------- | ----------- |
-| `help` | List commands |
-| `projects` / `ls` | List projects |
-| `open ditto` / `open golf` | Navigate to project |
-| `status` | Health check both projects |
-| `stats` | Live stats for Ditto + Golf |
-| `ditto stats` / `golf stats` | Single project stats |
-| `refresh` | Bust cache and re-fetch |
-| `dashboard` / `dashboard hide` | Toggle stat panels |
-| `clear` | Clear terminal |
-| `about`, `whoami`, `banner`, `sudo` | Easter eggs |
-
-## Live stats (CORS)
-
-Stats fetch from `ditto.jungle.win` and `golf.ancc.blog`. Golf requires CORS allowlist for `https://ancc.blog` (see `golf-model/app.py`). Ditto allows cross-origin reads via existing `cors()` middleware.
+| Source | How |
+| ------ | --- |
+| **Ditto** | Cross-origin fetch to `ditto.jungle.win/api/public/landing-preview` (+ optional `/api/public/stats` for wallet counts) |
+| **Golf** | Same-origin proxy at `ancc.blog/api/golf/*` → local FastAPI on `:8000` (see `Caddyfile`) |
 
 ## What this repo contains
 
-- `src/` — Vite app (shell, dashboard, stats client)
-- `deploy.sh` — build + publish to VPS
-- `Caddyfile` — HTTPS routing for ancc.blog + golf.ancc.blog
+- `src/` — Vite app (projects, dashboard, stats client)
+- `Caddyfile` — HTTPS routing for ancc.blog + golf.ancc.blog + Golf API proxy
+- `deploy.sh` — build, publish, and reload Caddy

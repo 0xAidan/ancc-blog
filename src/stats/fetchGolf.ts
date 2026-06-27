@@ -1,6 +1,8 @@
 import type { GolfStats } from "./types";
 import { fetchJson } from "./fetchUtils";
 
+const GOLF_API_BASE = "/api/golf";
+
 type TrackRecordEvent = {
   graded_pick_count?: number;
   wins?: number;
@@ -24,7 +26,7 @@ export const fetchGolfStats = async (): Promise<GolfStats> => {
 
   try {
     const healthStart = performance.now();
-    const healthRes = await fetch("https://golf.ancc.blog/api/dashboard/state", {
+    const healthRes = await fetch(`${GOLF_API_BASE}/dashboard/state`, {
       signal: AbortSignal.timeout(8000),
     });
     latencyMs = Math.round(performance.now() - healthStart);
@@ -51,8 +53,8 @@ export const fetchGolfStats = async (): Promise<GolfStats> => {
   let partial = false;
 
   const results = await Promise.allSettled([
-    fetchJson<TrackRecordResponse>("https://golf.ancc.blog/api/track-record?limit=50"),
-    fetchJson<DashboardStateResponse>("https://golf.ancc.blog/api/dashboard/state"),
+    fetchJson<TrackRecordResponse>(`${GOLF_API_BASE}/track-record?limit=50`),
+    fetchJson<DashboardStateResponse>(`${GOLF_API_BASE}/dashboard/state`),
   ]);
 
   if (results[0].status === "fulfilled") {
