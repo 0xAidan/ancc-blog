@@ -3,7 +3,6 @@ import { PROJECTS, type ProjectId } from "./data/projects";
 import { createStatusDot, updateStatusDot } from "./components/StatusDot";
 import { createDashboard, updateDashboard, type DashboardElements } from "./components/Dashboard";
 import { getStats } from "./stats/cache";
-import { appendHistoryPoint } from "./stats/history";
 import type { StatsSnapshot } from "./stats/types";
 
 const statusDotEls: Partial<Record<ProjectId, HTMLSpanElement>> = {};
@@ -20,6 +19,7 @@ const buildPage = (): DashboardElements => {
   const main = document.createElement("main");
 
   const header = document.createElement("header");
+  header.className = "site-header";
   header.innerHTML = `
     <h1 translate="no">Aidan Nugent Consulting Company</h1>
     <p class="tagline">Projects and experiments<span class="cursor" aria-hidden="true">▍</span></p>
@@ -30,7 +30,7 @@ const buildPage = (): DashboardElements => {
   nav.setAttribute("aria-label", "Projects");
 
   const navTitle = document.createElement("h2");
-  navTitle.className = "sr-only";
+  navTitle.className = "section-label";
   navTitle.textContent = "Projects";
 
   const list = document.createElement("ul");
@@ -39,32 +39,40 @@ const buildPage = (): DashboardElements => {
   for (const project of PROJECTS) {
     const li = document.createElement("li");
     const link = document.createElement("a");
-    link.className = "project-link";
+    link.className = "project-card";
     link.href = project.url;
     link.rel = "noopener noreferrer";
 
     const dot = createStatusDot("down");
     statusDotEls[project.id] = dot;
 
-    const desc = document.createElement("span");
-    desc.className = "description";
-    desc.textContent = project.description;
+    const headerRow = document.createElement("div");
+    headerRow.className = "project-card-header";
 
-    const hint = document.createElement("span");
-    hint.className = "stat-hint";
+    const nameEl = document.createElement("span");
+    nameEl.className = "project-name";
+    nameEl.textContent = project.name;
+
+    headerRow.appendChild(nameEl);
+    headerRow.appendChild(dot);
+
+    const domainEl = document.createElement("span");
+    domainEl.className = "project-domain";
+    domainEl.textContent = project.domain;
+    domainEl.setAttribute("translate", "no");
+
+    const descEl = document.createElement("p");
+    descEl.className = "project-description";
+    descEl.textContent = project.description;
+
+    const hint = document.createElement("p");
+    hint.className = "project-stat-hint";
     statHintEls[project.id] = hint;
-    desc.appendChild(document.createElement("br"));
-    desc.appendChild(hint);
 
-    link.innerHTML = `
-      <span class="project-row">
-        <span class="prompt" aria-hidden="true">→</span>
-        <span class="domain" translate="no">${project.domain}</span>
-        <span class="name">${project.name}</span>
-      </span>
-    `;
-    link.querySelector(".project-row")!.appendChild(dot);
-    link.appendChild(desc);
+    link.appendChild(headerRow);
+    link.appendChild(domainEl);
+    link.appendChild(descEl);
+    link.appendChild(hint);
     li.appendChild(link);
     list.appendChild(li);
   }
@@ -73,6 +81,15 @@ const buildPage = (): DashboardElements => {
   nav.appendChild(list);
 
   const dashboard = createDashboard();
+
+  const statsTitle = document.createElement("h2");
+  statsTitle.className = "section-label";
+  statsTitle.textContent = "Live stats";
+
+  const dashboardSection = document.createElement("div");
+  dashboardSection.className = "dashboard-section";
+  dashboardSection.appendChild(statsTitle);
+  dashboardSection.appendChild(dashboard.root);
 
   const footer = document.createElement("footer");
   footer.innerHTML = `
@@ -85,7 +102,7 @@ const buildPage = (): DashboardElements => {
 
   main.appendChild(header);
   main.appendChild(nav);
-  main.appendChild(dashboard.root);
+  main.appendChild(dashboardSection);
   main.appendChild(footer);
 
   app.appendChild(skipLink);
@@ -99,14 +116,16 @@ const applyStats = (snapshot: StatsSnapshot, dashboard: DashboardElements): void
   updateStatusDot(statusDotEls.golf!, snapshot.golf.status);
 
   if (statHintEls.ditto && snapshot.ditto.agents !== null) {
-    statHintEls.ditto.textContent = `${snapshot.ditto.agents} agents · ${snapshot.ditto.walletsScored ?? "—"} wallets`;
+    const wallets =
+      snapshot.ditto.walletsScored !== null
+        ? `${snapshot.ditto.walletsScored.toLocaleString()} wallets`
+        : "live";
+    statHintEls.ditto.textContent = `${snapshot.ditto.agents} agents · ${wallets}`;
   }
   if (statHintEls.golf && snapshot.golf.winRate !== null) {
     statHintEls.golf.textContent = `${snapshot.golf.winRate}% win · ${snapshot.golf.picksGraded ?? 0} picks`;
   }
 
-  updateDashboard(dashboard, snapshot.ditto, snapshot.golf, snapshot.fetchedAt);
-  appendHistoryPoint(snapshot.ditto.walletsScored, snapshot.golf.winRate);
   updateDashboard(dashboard, snapshot.ditto, snapshot.golf, snapshot.fetchedAt);
 };
 

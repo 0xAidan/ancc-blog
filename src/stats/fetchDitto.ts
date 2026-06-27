@@ -3,9 +3,14 @@ import { fetchJson } from "./fetchUtils";
 
 type HealthResponse = { status: string; timestamp?: string };
 
+type LandingPreviewResponse = {
+  success: boolean;
+  meta?: { totalEnabled?: number };
+};
+
 type PublicStatsResponse = {
   success: boolean;
-  agents: number;
+  agents?: number;
   walletsScored: number | null;
   tierCounts: {
     alpha: number | null;
@@ -14,6 +19,17 @@ type PublicStatsResponse = {
   };
   lastUpdated: string | null;
   discoveryV3: boolean;
+};
+
+const fetchPublicStats = async (): Promise<PublicStatsResponse | null> => {
+  try {
+    const result = await fetchJson<PublicStatsResponse>(
+      "https://ditto.jungle.win/api/public/stats",
+    );
+    return result.data.success ? result.data : null;
+  } catch {
+    return null;
+  }
 };
 
 export const fetchDittoStats = async (): Promise<DittoStats> => {
@@ -37,22 +53,19 @@ export const fetchDittoStats = async (): Promise<DittoStats> => {
     };
   }
 
-  try {
-    const stats = await fetchJson<PublicStatsResponse>("https://ditto.jungle.win/api/public/stats");
-    latencyMs = Math.max(latencyMs ?? 0, stats.latencyMs);
-    const data = stats.data;
-    const missingWallets = data.discoveryV3 && data.walletsScored === null;
+  let agents: number | null = null;
+  let walletsScored: number | null = null;
+  let tierAlpha: number | null = null;
+  let tierWhale: number | null = null;
+  let tierSpecialist: number | null = null;
+  let lastUpdated: string | null = null;
 
-    return {
-      status: healthOk ? (missingWallets ? "degraded" : "up") : "down",
-      latencyMs,
-      agents: data.agents,
-      walletsScored: data.walletsScored,
-      tierAlpha: data.tierCounts.alpha,
-      tierWhale: data.tierCounts.whale,
-      tierSpecialist: data.tierCounts.specialist,
-      lastUpdated: data.lastUpdated,
-    };
+  try {
+    const preview = await fetchJson<LandingPreviewResponse>(
+      "https://ditto.jungle.win/api/public/landing-preview",
+    );
+    latencyMs = Math.max(latencyMs ?? 0, preview.latencyMs);
+    agents = preview.data.meta?.totalEnabled ?? null;
   } catch {
     return {
       status: healthOk ? "degraded" : "down",
@@ -65,4 +78,30 @@ export const fetchDittoStats = async (): Promise<DittoStats> => {
       lastUpdated: null,
     };
   }
+
+  const extended = await fetchPublicStats();
+  if (extended) {
+    if (extended.agents != null) {
+      agents = extended.agents;
+    }
+    walletsScored = extended.walletsScored;
+    tierAlpha = extended.tierCounts.alpha;
+    tierWhale = extended.tierCounts.whale;
+    tierSpecialist = extended.tierCounts.specialist;
+    lastUpdated = extended.lastUpdated;
+  }
+
+  const missingWallets = extended?.discoveryV3 && walletsScored === null;
+  const status = healthOk ? (agents === null ? "degraded" : missingWallets ? "degraded" : "up") : "down";
+
+  return {
+    status,
+    latencyMs,
+    agents,
+    walletsScored,
+    tierAlpha,
+    tierWhale,
+    tierSpecialist,
+    lastUpdated,
+  };
 };

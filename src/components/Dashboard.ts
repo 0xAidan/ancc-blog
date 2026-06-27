@@ -1,6 +1,5 @@
 import type { DittoStats, GolfStats } from "../stats/types";
-import { getSparklineValues, loadHistory } from "../stats/history";
-import { renderSparkline } from "./Sparkline";
+import { PROJECTS } from "../data/projects";
 
 const formatRelative = (ts: number): string => {
   const diff = Date.now() - ts;
@@ -15,16 +14,44 @@ const fmt = (v: number | null, suffix = ""): string =>
 
 export type DashboardElements = {
   root: HTMLElement;
+  dittoCard: HTMLAnchorElement;
   dittoPrimary: HTMLElement;
   dittoSecondary: HTMLElement;
   dittoTertiary: HTMLElement;
-  dittoSparkline: HTMLElement;
   dittoUpdated: HTMLElement;
+  golfCard: HTMLAnchorElement;
   golfPrimary: HTMLElement;
   golfSecondary: HTMLElement;
   golfTertiary: HTMLElement;
-  golfSparkline: HTMLElement;
   golfUpdated: HTMLElement;
+};
+
+const createStatCard = (title: string, href: string): {
+  card: HTMLAnchorElement;
+  primary: HTMLElement;
+  secondary: HTMLElement;
+  tertiary: HTMLElement;
+  updated: HTMLElement;
+} => {
+  const card = document.createElement("a");
+  card.className = "stat-card";
+  card.href = href;
+  card.rel = "noopener noreferrer";
+  card.innerHTML = `
+    <h3 class="stat-card-title">${title}</h3>
+    <p class="stat-primary stat-skeleton">Checking…</p>
+    <p class="stat-secondary"></p>
+    <p class="stat-tertiary"></p>
+    <p class="stat-updated"></p>
+  `;
+
+  return {
+    card,
+    primary: card.querySelector(".stat-primary")!,
+    secondary: card.querySelector(".stat-secondary")!,
+    tertiary: card.querySelector(".stat-tertiary")!,
+    updated: card.querySelector(".stat-updated")!,
+  };
 };
 
 export const createDashboard = (): DashboardElements => {
@@ -32,50 +59,34 @@ export const createDashboard = (): DashboardElements => {
   root.id = "dashboard";
   root.className = "dashboard";
   root.setAttribute("aria-label", "Project statistics");
-  root.setAttribute("aria-expanded", "true");
 
   const grid = document.createElement("div");
   grid.className = "dashboard-grid";
 
-  const dittoCard = document.createElement("article");
-  dittoCard.className = "stat-card";
-  dittoCard.innerHTML = `
-    <h3 class="stat-card-title">Ditto</h3>
-    <p class="stat-primary"></p>
-    <p class="stat-secondary"></p>
-    <p class="stat-tertiary"></p>
-    <div class="stat-sparkline"></div>
-    <p class="stat-updated"></p>
-  `;
+  const ditto = createStatCard("Ditto", PROJECTS[0].url);
+  const golf = createStatCard("Golf Model", PROJECTS[1].url);
 
-  const golfCard = document.createElement("article");
-  golfCard.className = "stat-card";
-  golfCard.innerHTML = `
-    <h3 class="stat-card-title">Golf Model</h3>
-    <p class="stat-primary"></p>
-    <p class="stat-secondary"></p>
-    <p class="stat-tertiary"></p>
-    <div class="stat-sparkline"></div>
-    <p class="stat-updated"></p>
-  `;
-
-  grid.appendChild(dittoCard);
-  grid.appendChild(golfCard);
+  grid.appendChild(ditto.card);
+  grid.appendChild(golf.card);
   root.appendChild(grid);
 
   return {
     root,
-    dittoPrimary: dittoCard.querySelector(".stat-primary")!,
-    dittoSecondary: dittoCard.querySelector(".stat-secondary")!,
-    dittoTertiary: dittoCard.querySelector(".stat-tertiary")!,
-    dittoSparkline: dittoCard.querySelector(".stat-sparkline")!,
-    dittoUpdated: dittoCard.querySelector(".stat-updated")!,
-    golfPrimary: golfCard.querySelector(".stat-primary")!,
-    golfSecondary: golfCard.querySelector(".stat-secondary")!,
-    golfTertiary: golfCard.querySelector(".stat-tertiary")!,
-    golfSparkline: golfCard.querySelector(".stat-sparkline")!,
-    golfUpdated: golfCard.querySelector(".stat-updated")!,
+    dittoCard: ditto.card,
+    dittoPrimary: ditto.primary,
+    dittoSecondary: ditto.secondary,
+    dittoTertiary: ditto.tertiary,
+    dittoUpdated: ditto.updated,
+    golfCard: golf.card,
+    golfPrimary: golf.primary,
+    golfSecondary: golf.secondary,
+    golfTertiary: golf.tertiary,
+    golfUpdated: golf.updated,
   };
+};
+
+const clearSkeleton = (el: HTMLElement): void => {
+  el.classList.remove("stat-skeleton");
 };
 
 export const updateDashboard = (
@@ -85,16 +96,18 @@ export const updateDashboard = (
   fetchedAt: number,
 ): void => {
   if (ditto.agents === null && ditto.walletsScored === null) {
+    clearSkeleton(els.dittoPrimary);
     els.dittoPrimary.textContent =
-      ditto.status === "down" ? "Stats unavailable" : "Loading stats…";
+      ditto.status === "down" ? "Offline" : "Checking…";
     els.dittoSecondary.textContent = "";
   } else {
+    clearSkeleton(els.dittoPrimary);
     els.dittoPrimary.textContent =
-      ditto.agents !== null ? `${ditto.agents} agents` : "Loading agents…";
+      ditto.agents !== null ? `${ditto.agents} agents` : "Checking…";
     els.dittoSecondary.textContent =
       ditto.walletsScored !== null
-        ? `${ditto.walletsScored} wallets scored`
-        : "Loading wallet data…";
+        ? `${ditto.walletsScored.toLocaleString()} wallets scored`
+        : "";
   }
   els.dittoTertiary.textContent =
     ditto.tierAlpha !== null
@@ -102,31 +115,30 @@ export const updateDashboard = (
       : "";
 
   if (golf.status === "down") {
-    els.golfPrimary.textContent = "Stats unavailable";
-    els.golfSecondary.textContent = "Could not reach golf.ancc.blog";
+    clearSkeleton(els.golfPrimary);
+    els.golfPrimary.textContent = "Offline";
+    els.golfSecondary.textContent = "Could not load stats";
   } else if (golf.winRate === null && (golf.picksGraded === null || golf.picksGraded === 0)) {
+    clearSkeleton(els.golfPrimary);
     els.golfPrimary.textContent = "No graded picks yet";
     els.golfSecondary.textContent = "";
   } else {
+    clearSkeleton(els.golfPrimary);
     els.golfPrimary.textContent =
-      golf.winRate !== null ? `${golf.winRate}% win rate` : "Loading win rate…";
-    els.golfSecondary.textContent =
-      golf.picksGraded !== null ? `${golf.picksGraded} picks graded` : "";
+      golf.winRate !== null ? `${golf.winRate}% win rate` : "Checking…";
+    const parts: string[] = [];
+    if (golf.picksGraded !== null) {
+      parts.push(`${golf.picksGraded.toLocaleString()} picks graded`);
+    }
+    if (golf.totalProfit !== null) {
+      const sign = golf.totalProfit >= 0 ? "+" : "";
+      parts.push(`${sign}${golf.totalProfit}u profit`);
+    }
+    els.golfSecondary.textContent = parts.join(" · ");
   }
   els.golfTertiary.textContent = golf.latestEvent ?? golf.modelName ?? "";
 
-  els.dittoUpdated.textContent = `Updated ${formatRelative(fetchedAt)}`;
-  els.golfUpdated.textContent = `Updated ${formatRelative(fetchedAt)}`;
-
-  const history = loadHistory();
-  renderSparkline(
-    els.dittoSparkline,
-    getSparklineValues(history, "dittoWallets"),
-    history.length < 2,
-  );
-  renderSparkline(
-    els.golfSparkline,
-    getSparklineValues(history, "golfWinRate"),
-    history.length < 2,
-  );
+  const updated = `Updated ${formatRelative(fetchedAt)}`;
+  els.dittoUpdated.textContent = updated;
+  els.golfUpdated.textContent = updated;
 };

@@ -6,4 +6,13 @@ export default defineConfig({
     outDir: "dist",
     assetsDir: "assets",
   },
+  server: {
+    proxy: {
+      "/api/golf": {
+        target: "https://golf.ancc.blog",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/golf/, "/api"),
+      },
+    },
+  },
 });
