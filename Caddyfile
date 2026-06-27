@@ -4,7 +4,7 @@ www.ancc.blog {
 
 ancc.blog {
 	handle /api/golf/* {
-		uri strip_prefix /api/golf
+		uri replace /api/golf /api
 		reverse_proxy 127.0.0.1:8000
 	}
 	handle {

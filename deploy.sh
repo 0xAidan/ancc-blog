@@ -11,6 +11,6 @@ npm run build
 scp -r dist/* "${DEPLOY_HOST}:/srv/ancc-blog/"
 scp Caddyfile "${DEPLOY_HOST}:${CADDYFILE_REMOTE}"
 
-ssh "${DEPLOY_HOST}" "caddy validate --config ${CADDYFILE_REMOTE} && systemctl reload caddy"
+ssh "${DEPLOY_HOST}" "caddy validate --config ${CADDYFILE_REMOTE} && (systemctl reload caddy || systemctl restart caddy)"
 
 echo "Deployed → https://ancc.blog"
