@@ -1,4 +1,4 @@
-export type ProjectId = "ditto" | "golf";
+export type ProjectId = "ditto" | "golf" | "blackjack";
 
 export type Project = {
   id: ProjectId;
@@ -23,6 +23,13 @@ export const PROJECTS: Project[] = [
     url: "https://golf.ancc.blog",
     description: "Golf analytics for sports betting",
   },
+  {
+    id: "blackjack",
+    name: "Blackjack Trainer",
+    domain: "blackjack.ancc.blog",
+    url: "https://blackjack.ancc.blog",
+    description: "Hi-Lo counting drills and basic strategy practice",
+  },
 ];
 
 export const getProject = (id: string): Project | undefined =>
@@ -32,5 +39,6 @@ export const resolveProjectArg = (arg: string): Project | undefined => {
   const lower = arg.toLowerCase();
   if (lower.includes("ditto")) return PROJECTS[0];
   if (lower.includes("golf")) return PROJECTS[1];
+  if (lower.includes("blackjack") || lower.includes("bj")) return PROJECTS[2];
   return getProject(lower);
 };

@@ -1,5 +1,6 @@
 import { fetchDittoStats } from "./fetchDitto";
 import { fetchGolfStats } from "./fetchGolf";
+import { fetchBlackjackStatus } from "./fetchBlackjack";
 import type { StatsSnapshot } from "./types";
 
 const TTL_MS = 60_000;
@@ -19,8 +20,12 @@ export const getStats = async (force = false): Promise<StatsSnapshot> => {
   }
 
   inflight = (async () => {
-    const [ditto, golf] = await Promise.all([fetchDittoStats(), fetchGolfStats()]);
-    const snapshot: StatsSnapshot = { fetchedAt: Date.now(), ditto, golf };
+    const [ditto, golf, blackjack] = await Promise.all([
+      fetchDittoStats(),
+      fetchGolfStats(),
+      fetchBlackjackStatus(),
+    ]);
+    const snapshot: StatsSnapshot = { fetchedAt: Date.now(), ditto, golf, blackjack };
     cache = snapshot;
     cacheTime = Date.now();
     inflight = null;

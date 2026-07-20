@@ -114,6 +114,9 @@ const buildPage = (): DashboardElements => {
 const applyStats = (snapshot: StatsSnapshot, dashboard: DashboardElements): void => {
   updateStatusDot(statusDotEls.ditto!, snapshot.ditto.status);
   updateStatusDot(statusDotEls.golf!, snapshot.golf.status);
+  if (statusDotEls.blackjack) {
+    updateStatusDot(statusDotEls.blackjack, snapshot.blackjack.status);
+  }
 
   if (statHintEls.ditto && snapshot.ditto.agents !== null) {
     const wallets =
@@ -124,6 +127,10 @@ const applyStats = (snapshot: StatsSnapshot, dashboard: DashboardElements): void
   }
   if (statHintEls.golf && snapshot.golf.winRate !== null) {
     statHintEls.golf.textContent = `${snapshot.golf.winRate}% win · ${snapshot.golf.picksGraded ?? 0} picks`;
+  }
+  if (statHintEls.blackjack) {
+    statHintEls.blackjack.textContent =
+      snapshot.blackjack.status === "up" ? "personal practice tool" : "checking…";
   }
 
   updateDashboard(dashboard, snapshot.ditto, snapshot.golf, snapshot.fetchedAt);

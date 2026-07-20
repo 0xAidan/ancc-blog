@@ -33,9 +33,10 @@ Builds the site, copies `dist/*` to the VPS, syncs the `Caddyfile`, and reloads 
 | ------ | --- |
 | **Ditto** | Cross-origin fetch to `ditto.jungle.win/api/public/landing-preview` (+ optional `/api/public/stats` for wallet counts) |
 | **Golf** | Same-origin proxy at `ancc.blog/api/golf/*` → local FastAPI on `:8000` (see `Caddyfile`) |
+| **Blackjack** | Project link to `blackjack.ancc.blog` (static trainer; HEAD status ping) |
 
 ## What this repo contains
 
 - `src/` — Vite app (projects, dashboard, stats client)
-- `Caddyfile` — HTTPS routing for ancc.blog + golf.ancc.blog + Golf API proxy
+- `Caddyfile` — HTTPS for ancc.blog, golf.ancc.blog, blackjack.ancc.blog + Golf API proxy
 - `deploy.sh` — build, publish, and reload Caddy

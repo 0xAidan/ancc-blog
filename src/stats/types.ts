@@ -25,6 +25,7 @@ export type StatsSnapshot = {
   fetchedAt: number;
   ditto: DittoStats;
   golf: GolfStats;
+  blackjack: { status: HealthStatus };
 };
 
 export type HistoryPoint = {

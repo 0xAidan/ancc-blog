@@ -16,3 +16,18 @@ ancc.blog {
 golf.ancc.blog {
 	reverse_proxy 127.0.0.1:8000
 }
+
+blackjack.ancc.blog {
+	header Access-Control-Allow-Origin https://ancc.blog
+	header Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+	@options {
+		method OPTIONS
+	}
+	handle @options {
+		respond 204
+	}
+	root * /srv/blackjack-trainer
+	encode gzip
+	try_files {path} {path}/ {path}/index.html /index.html
+	file_server
+}
