@@ -1,24 +1,64 @@
-www.ancc.blog {
-	redir https://ancc.blog{uri} 308
+# Sherman-Davison Business Solutions — production Caddy config
+# Deployed by deploy.sh to /etc/caddy/Caddyfile
+
+www.shermandavison.com {
+	redir https://shermandavison.com{uri} 308
 }
 
-ancc.blog {
+shermandavison.com {
 	handle /api/golf/* {
 		uri replace /api/golf /api
 		reverse_proxy 127.0.0.1:8000
 	}
+
+	handle /api/ditto/* {
+		uri replace /api/ditto /
+		reverse_proxy https://ditto.jungle.win {
+			header_up Host ditto.jungle.win
+			header_up X-Forwarded-Proto {http.request.scheme}
+		}
+	}
+
 	handle {
-		root * /srv/ancc-blog
+		root * /srv/shermandavison
+		encode gzip
 		file_server
 	}
 }
 
-golf.ancc.blog {
+golf.shermandavison.com {
+	@blocked not method GET HEAD OPTIONS
+	respond @blocked 405
+
+	@options method OPTIONS
+	handle @options {
+		header Access-Control-Allow-Origin https://shermandavison.com
+		header Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+		header Access-Control-Allow-Headers "Content-Type"
+		respond 204
+	}
+
+	header Access-Control-Allow-Origin https://shermandavison.com
+	header Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
 	reverse_proxy 127.0.0.1:8000
 }
 
+# --- Legacy ancc.blog redirects (keep DNS pointed at this VPS) ---
+
+www.ancc.blog {
+	redir https://shermandavison.com{uri} 301
+}
+
+ancc.blog {
+	redir https://shermandavison.com{uri} 301
+}
+
+golf.ancc.blog {
+	redir https://golf.shermandavison.com{uri} 301
+}
+
 blackjack.ancc.blog {
-	header Access-Control-Allow-Origin https://ancc.blog
+	header Access-Control-Allow-Origin https://shermandavison.com
 	header Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
 	@options {
 		method OPTIONS

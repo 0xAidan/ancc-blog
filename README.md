@@ -1,6 +1,8 @@
-# ancc.blog
+# Sherman-Davison Business Solutions
 
-Landing page for **Aidan Nugent Consulting Company** — editorial portfolio with live project stats.
+Landing page for **Sherman-Davison Business Solutions** — editorial portfolio with live project stats.
+
+Domain: [shermandavison.com](https://shermandavison.com) (formerly `ancc.blog`).
 
 ## Stack
 
@@ -17,7 +19,14 @@ npm run dev
 
 Open http://localhost:5173
 
-Golf stats use a dev proxy (`/api/golf/*` → `golf.ancc.blog/api/*`) configured in `vite.config.ts`.
+Dev proxies (see `vite.config.ts`):
+
+- `/api/golf/*` → golf API
+- `/api/ditto/*` → `ditto.jungle.win`
+
+## DNS (required before first deploy of the new domain)
+
+See [docs/DNS-PORKBUN.md](docs/DNS-PORKBUN.md). Point `@`, `www`, and `golf` A records at `204.168.147.6`, then wait for propagation.
 
 ## Deploy
 
@@ -25,18 +34,19 @@ Golf stats use a dev proxy (`/api/golf/*` → `golf.ancc.blog/api/*`) configured
 ./deploy.sh
 ```
 
-Builds the site, copies `dist/*` to the VPS, syncs the `Caddyfile`, and reloads Caddy.
+Builds the site, rsyncs `dist/` to `/srv/shermandavison` on the VPS, backs up and syncs the `Caddyfile`, and reloads Caddy.
 
 ## Live stats
 
 | Source | How |
 | ------ | --- |
-| **Ditto** | Cross-origin fetch to `ditto.jungle.win/api/public/landing-preview` (+ optional `/api/public/stats` for wallet counts) |
-| **Golf** | Same-origin proxy at `ancc.blog/api/golf/*` → local FastAPI on `:8000` (see `Caddyfile`) |
-| **Blackjack** | Project link to `blackjack.ancc.blog` (static trainer; HEAD status ping) |
+| **Ditto** | Same-origin proxy `/api/ditto/*` → `ditto.jungle.win` (avoids CORS) |
+| **Golf** | Same-origin proxy `/api/golf/*` → local FastAPI on `:8000` |
+| **Blackjack** | Still at `blackjack.ancc.blog` (not linked on homepage after rebrand) |
 
 ## What this repo contains
 
 - `src/` — Vite app (projects, dashboard, stats client)
-- `Caddyfile` — HTTPS for ancc.blog, golf.ancc.blog, blackjack.ancc.blog + Golf API proxy
+- `Caddyfile` — HTTPS for shermandavison.com, golf subdomain, legacy redirects, Ditto proxy
 - `deploy.sh` — build, publish, and reload Caddy
+- `docs/DNS-PORKBUN.md` — Porkbun DNS checklist
