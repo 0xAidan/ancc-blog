@@ -1,7 +1,10 @@
-import type { DittoStats } from "./types";
 import { fetchJson } from "./fetchUtils";
+import type { DittoStats } from "./types";
 
-type HealthResponse = { status: string; timestamp?: string };
+/** Same-origin proxy (Caddy / Vite) — avoids browser CORS blocks. */
+const DITTO_API_BASE = "/api/ditto";
+
+type HealthResponse = { status: string };
 
 type LandingPreviewResponse = {
   success: boolean;
@@ -19,20 +22,6 @@ type PublicStatsResponse = {
   };
   lastUpdated: string | null;
   discoveryV3: boolean;
-};
-
-/** Same-origin proxy (see Caddyfile) — avoids browser CORS blocks. */
-const DITTO_API_BASE = "/api/ditto";
-
-const fetchPublicStats = async (): Promise<PublicStatsResponse | null> => {
-  try {
-    const result = await fetchJson<PublicStatsResponse>(
-      `${DITTO_API_BASE}/api/public/stats`,
-    );
-    return result.data.success ? result.data : null;
-  } catch {
-    return null;
-  }
 };
 
 export const fetchDittoStats = async (): Promise<DittoStats> => {
@@ -82,23 +71,24 @@ export const fetchDittoStats = async (): Promise<DittoStats> => {
     };
   }
 
-  const extended = await fetchPublicStats();
-  if (extended) {
-    if (extended.agents != null) {
-      agents = extended.agents;
+  try {
+    const extended = await fetchJson<PublicStatsResponse>(
+      `${DITTO_API_BASE}/api/public/stats`,
+    );
+    if (extended.data.success) {
+      if (extended.data.agents != null) agents = extended.data.agents;
+      walletsScored = extended.data.walletsScored;
+      tierAlpha = extended.data.tierCounts.alpha;
+      tierWhale = extended.data.tierCounts.whale;
+      tierSpecialist = extended.data.tierCounts.specialist;
+      lastUpdated = extended.data.lastUpdated;
     }
-    walletsScored = extended.walletsScored;
-    tierAlpha = extended.tierCounts.alpha;
-    tierWhale = extended.tierCounts.whale;
-    tierSpecialist = extended.tierCounts.specialist;
-    lastUpdated = extended.lastUpdated;
+  } catch {
+    /* optional enrichment */
   }
 
-  const missingWallets = extended?.discoveryV3 && walletsScored === null;
-  const status = healthOk ? (agents === null ? "degraded" : missingWallets ? "degraded" : "up") : "down";
-
   return {
-    status,
+    status: healthOk ? (agents === null ? "degraded" : "up") : "down",
     latencyMs,
     agents,
     walletsScored,

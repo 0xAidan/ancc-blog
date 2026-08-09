@@ -1,0 +1,80 @@
+---
+import { STAT_PANELS, CHART_PANELS } from "../config/panels";
+---
+
+<section id="dashboard" class="mx-auto max-w-6xl px-4 py-8 sm:px-6" aria-labelledby="dashboard-heading">
+  <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h2 id="dashboard-heading" class="section-label">Live stats</h2>
+      <p class="mt-2 text-sm text-muted">
+        Calibration, closing-line value, and live system health.
+      </p>
+    </div>
+    <p class="font-mono text-xs text-faint" data-dashboard-updated>Checking…</p>
+  </div>
+
+  <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label="Headline metrics">
+    {
+      STAT_PANELS.map((panel) => (
+        <li
+          class="glass relative rounded-2xl p-4 skeleton"
+          data-stat={panel.id}
+          data-state="loading"
+        >
+          <div class="flex items-start justify-between gap-2">
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-faint">
+              {panel.title}
+            </p>
+            <span
+              class="rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-warn"
+              data-unavailable
+              hidden
+            >
+              unavailable
+            </span>
+          </div>
+          <p class="stat-num mt-3 text-2xl text-text sm:text-3xl" data-stat-value>—</p>
+          {panel.description ? (
+            <p class="mt-2 text-xs text-faint">{panel.description}</p>
+          ) : null}
+        </li>
+      ))
+    }
+  </ul>
+
+  <ul class="mt-4 grid gap-4 lg:grid-cols-2" aria-label="Charts">
+    {
+      CHART_PANELS.map((panel) => (
+        <li
+          class="glass relative min-h-[280px] rounded-2xl p-4 skeleton"
+          data-chart={panel.id}
+          data-state="loading"
+        >
+          <div class="mb-3 flex items-start justify-between gap-2">
+            <div>
+              <h3 class="text-sm font-medium text-text">{panel.title}</h3>
+              {panel.description ? (
+                <p class="mt-1 text-xs text-faint">{panel.description}</p>
+              ) : null}
+            </div>
+            <span
+              class="rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-warn"
+              data-unavailable
+              hidden
+            >
+              unavailable
+            </span>
+          </div>
+          <div class="relative h-56 w-full">
+            <canvas id={`chart-${panel.id}`} role="img" aria-label={panel.title}></canvas>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<script>
+  import { mountDashboard } from "../lib/dashboard-client";
+  mountDashboard();
+</script>

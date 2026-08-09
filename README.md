@@ -1,14 +1,16 @@
 # Sherman-Davison Business Solutions
 
-Landing page for **Sherman-Davison Business Solutions** — editorial portfolio with live project stats.
+Landing site for **Sherman-Davison Business Solutions** — futuristic dark portfolio with a config-driven live dashboard, project pages, and tools.
 
-Domain: [shermandavison.com](https://shermandavison.com) (formerly `ancc.blog`).
+Live domain: [shermandavison.com](https://shermandavison.com) (formerly `ancc.blog`).
 
 ## Stack
 
-- Vite + TypeScript (static build)
-- **Italiana** (hero) + **Cutive Mono** (body)
-- Deployed to Hetzner via Caddy
+- Astro 5 (static)
+- Tailwind CSS v4
+- Chart.js (lazy-loaded client charts)
+- Space Grotesk + JetBrains Mono (self-hosted)
+- Deployed to Hetzner via Caddy (`./deploy.sh`)
 
 ## Local development
 
@@ -17,16 +19,28 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173
+Open http://localhost:4321
 
-Dev proxies (see `vite.config.ts`):
+Dev proxies:
 
 - `/api/golf/*` → golf API
 - `/api/ditto/*` → `ditto.jungle.win`
 
-## DNS (required before first deploy of the new domain)
+## Configure (easy extensions)
 
-See [docs/DNS-PORKBUN.md](docs/DNS-PORKBUN.md). Point `@`, `www`, and `golf` A records at `204.168.147.6`, then wait for propagation.
+| File | Purpose |
+| ---- | ------- |
+| `src/config/site.ts` | Brand, nav, social, footer |
+| `src/config/projects.ts` | Projects (`hidden: true` to hide) |
+| `src/config/panels.ts` | Dashboard stats + charts |
+| `src/config/tools.ts` | Tools registry |
+| `src/lib/sources/` | API adapters (`golf.ts`, `ditto.ts`) |
+
+Add a project = one object in `projects.ts`. Add a chart = one object in `panels.ts` + mapping in `dashboard-client.ts` if needed.
+
+## DNS
+
+See [docs/DNS-PORKBUN.md](docs/DNS-PORKBUN.md). Point `@`, `www`, and `golf` A records at `204.168.147.6` before the first production deploy.
 
 ## Deploy
 
@@ -34,19 +48,4 @@ See [docs/DNS-PORKBUN.md](docs/DNS-PORKBUN.md). Point `@`, `www`, and `golf` A r
 ./deploy.sh
 ```
 
-Builds the site, rsyncs `dist/` to `/srv/shermandavison` on the VPS, backs up and syncs the `Caddyfile`, and reloads Caddy.
-
-## Live stats
-
-| Source | How |
-| ------ | --- |
-| **Ditto** | Same-origin proxy `/api/ditto/*` → `ditto.jungle.win` (avoids CORS) |
-| **Golf** | Same-origin proxy `/api/golf/*` → local FastAPI on `:8000` |
-| **Blackjack** | Still at `blackjack.ancc.blog` (not linked on homepage after rebrand) |
-
-## What this repo contains
-
-- `src/` — Vite app (projects, dashboard, stats client)
-- `Caddyfile` — HTTPS for shermandavison.com, golf subdomain, legacy redirects, Ditto proxy
-- `deploy.sh` — build, publish, and reload Caddy
-- `docs/DNS-PORKBUN.md` — Porkbun DNS checklist
+Builds with Astro, rsyncs `dist/` to `/srv/shermandavison`, backs up and syncs the `Caddyfile`, reloads Caddy.

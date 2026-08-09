@@ -1,0 +1,159 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import { getToolBySlug, TOOLS } from "../../config/tools";
+import { site } from "../../config/site";
+
+export const getStaticPaths = () =>
+  TOOLS.map((tool) => ({
+    params: { slug: tool.slug },
+  }));
+
+const { slug } = Astro.params;
+const tool = getToolBySlug(slug!);
+
+if (!tool) {
+  return Astro.redirect("/tools");
+}
+---
+
+<BaseLayout
+  title={`${tool.name} · ${site.shortName}`}
+  description={tool.description}
+  path={`/tools/${tool.slug}`}
+>
+  <SiteHeader />
+  <main id="main" class="mx-auto max-w-xl px-4 py-16 sm:px-6">
+    <p class="section-label mb-4">Tool</p>
+    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">{tool.name}</h1>
+    <p class="mt-3 text-muted">{tool.description}</p>
+
+    {
+      tool.slug === "odds-converter" ? (
+        <form
+          id="odds-form"
+          class="glass mt-10 space-y-5 rounded-2xl p-6"
+          aria-label="Odds converter"
+        >
+          <div>
+            <label for="american" class="mb-1 block font-mono text-xs uppercase tracking-wider text-faint">
+              American
+            </label>
+            <input
+              id="american"
+              name="american"
+              type="text"
+              inputmode="numeric"
+              placeholder="-110"
+              class="w-full rounded-lg border border-border bg-bg/60 px-3 py-2 font-mono text-text outline-none focus:border-cyan"
+              autocomplete="off"
+            />
+          </div>
+          <div>
+            <label for="decimal" class="mb-1 block font-mono text-xs uppercase tracking-wider text-faint">
+              Decimal
+            </label>
+            <input
+              id="decimal"
+              name="decimal"
+              type="text"
+              inputmode="decimal"
+              placeholder="1.91"
+              class="w-full rounded-lg border border-border bg-bg/60 px-3 py-2 font-mono text-text outline-none focus:border-cyan"
+              autocomplete="off"
+            />
+          </div>
+          <div>
+            <label for="implied" class="mb-1 block font-mono text-xs uppercase tracking-wider text-faint">
+              Implied probability %
+            </label>
+            <input
+              id="implied"
+              name="implied"
+              type="text"
+              inputmode="decimal"
+              placeholder="52.4"
+              class="w-full rounded-lg border border-border bg-bg/60 px-3 py-2 font-mono text-text outline-none focus:border-cyan"
+              autocomplete="off"
+            />
+          </div>
+          <p id="odds-error" class="hidden font-mono text-xs text-danger" role="alert"></p>
+        </form>
+      ) : (
+        <p class="mt-8 text-sm text-faint">This tool is not ready yet.</p>
+      )
+    }
+
+    <p class="mt-8">
+      <a href="/tools" class="text-sm text-cyan hover:underline">← All tools</a>
+    </p>
+  </main>
+  <SiteFooter />
+</BaseLayout>
+
+{
+  tool.slug === "odds-converter" ? (
+    <script>
+      const american = document.getElementById("american") as HTMLInputElement;
+      const decimal = document.getElementById("decimal") as HTMLInputElement;
+      const implied = document.getElementById("implied") as HTMLInputElement;
+      const errorEl = document.getElementById("odds-error") as HTMLParagraphElement;
+
+      let locked = false;
+
+      const showError = (msg: string | null): void => {
+        if (!msg) {
+          errorEl.classList.add("hidden");
+          errorEl.textContent = "";
+          return;
+        }
+        errorEl.textContent = msg;
+        errorEl.classList.remove("hidden");
+      };
+
+      const americanToDecimal = (a: number): number =>
+        a > 0 ? 1 + a / 100 : 1 + 100 / Math.abs(a);
+
+      const decimalToAmerican = (d: number): number =>
+        d >= 2 ? Math.round((d - 1) * 100) : Math.round(-100 / (d - 1));
+
+      const decimalToImplied = (d: number): number => (1 / d) * 100;
+
+      const syncFrom = (source: "american" | "decimal" | "implied"): void => {
+        if (locked) return;
+        locked = true;
+        showError(null);
+        try {
+          if (source === "american") {
+            const a = Number(american.value.replace("+", ""));
+            if (!Number.isFinite(a) || a === 0) throw new Error("Enter a non-zero American line");
+            const d = americanToDecimal(a);
+            decimal.value = d.toFixed(3);
+            implied.value = decimalToImplied(d).toFixed(2);
+          } else if (source === "decimal") {
+            const d = Number(decimal.value);
+            if (!Number.isFinite(d) || d <= 1) throw new Error("Decimal must be greater than 1");
+            american.value = String(decimalToAmerican(d));
+            implied.value = decimalToImplied(d).toFixed(2);
+          } else {
+            const p = Number(implied.value);
+            if (!Number.isFinite(p) || p <= 0 || p >= 100)
+              throw new Error("Implied % must be between 0 and 100");
+            const d = 100 / p;
+            decimal.value = d.toFixed(3);
+            american.value = String(decimalToAmerican(d));
+          }
+        } catch (err) {
+          showError(err instanceof Error ? err.message : "Invalid input");
+        } finally {
+          locked = false;
+        }
+      };
+
+      american.addEventListener("input", () => syncFrom("american"));
+      decimal.addEventListener("input", () => syncFrom("decimal"));
+      implied.addEventListener("input", () => syncFrom("implied"));
+    </script>
+  ) : null
+}
