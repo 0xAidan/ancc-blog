@@ -21,10 +21,13 @@ type PublicStatsResponse = {
   discoveryV3: boolean;
 };
 
+/** Same-origin proxy (see Caddyfile) — avoids browser CORS blocks. */
+const DITTO_API_BASE = "/api/ditto";
+
 const fetchPublicStats = async (): Promise<PublicStatsResponse | null> => {
   try {
     const result = await fetchJson<PublicStatsResponse>(
-      "https://ditto.jungle.win/api/public/stats",
+      `${DITTO_API_BASE}/api/public/stats`,
     );
     return result.data.success ? result.data : null;
   } catch {
@@ -37,7 +40,7 @@ export const fetchDittoStats = async (): Promise<DittoStats> => {
   let healthOk = false;
 
   try {
-    const health = await fetchJson<HealthResponse>("https://ditto.jungle.win/health");
+    const health = await fetchJson<HealthResponse>(`${DITTO_API_BASE}/health`);
     latencyMs = health.latencyMs;
     healthOk = health.data.status === "ok";
   } catch {
@@ -62,7 +65,7 @@ export const fetchDittoStats = async (): Promise<DittoStats> => {
 
   try {
     const preview = await fetchJson<LandingPreviewResponse>(
-      "https://ditto.jungle.win/api/public/landing-preview",
+      `${DITTO_API_BASE}/api/public/landing-preview`,
     );
     latencyMs = Math.max(latencyMs ?? 0, preview.latencyMs);
     agents = preview.data.meta?.totalEnabled ?? null;

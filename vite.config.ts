@@ -13,6 +13,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/golf/, "/api"),
       },
+      "/api/ditto": {
+        target: "https://ditto.jungle.win",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/ditto/, ""),
+      },
     },
   },
 });

@@ -19,8 +19,8 @@ export const PROJECTS: Project[] = [
   {
     id: "golf",
     name: "Golf Model",
-    domain: "golf.ancc.blog",
-    url: "https://golf.ancc.blog",
+    domain: "golf.shermandavison.com",
+    url: "https://golf.shermandavison.com",
     description: "Golf analytics for sports betting",
   },
   {
