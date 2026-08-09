@@ -11,11 +11,9 @@ shermandavison.com {
 		reverse_proxy 127.0.0.1:8000
 	}
 
-	handle /api/ditto/* {
-		uri replace /api/ditto /
+	handle_path /api/ditto/* {
 		reverse_proxy https://ditto.jungle.win {
 			header_up Host ditto.jungle.win
-			header_up X-Forwarded-Proto {http.request.scheme}
 		}
 	}
 
