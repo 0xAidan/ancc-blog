@@ -1,0 +1,28 @@
+---
+import { site } from "../config/site";
+---
+
+<footer class="mt-24 border-t border-border/50">
+  <div class="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+    <div class="space-y-1">
+      <p class="text-sm text-text">{site.shortName}</p>
+      <p class="font-mono text-xs text-faint">{site.footer.note}</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-3 font-mono text-xs text-muted">
+      <small>© {site.footer.copyrightYear}</small>
+      <span aria-hidden="true">·</span>
+      {
+        site.social.map((s) => (
+          <a
+            class="hover:text-cyan"
+            href={s.href}
+            rel="noopener noreferrer"
+            aria-label={s.label}
+          >
+            {s.handle}
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</footer>

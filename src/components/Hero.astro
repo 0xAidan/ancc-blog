@@ -1,0 +1,27 @@
+---
+import { site } from "../config/site";
+---
+
+<section class="relative mx-auto max-w-6xl px-4 pb-16 pt-16 sm:px-6 sm:pt-24" aria-labelledby="hero-heading">
+  <p class="section-label mb-4">{site.eyebrow}</p>
+  <h1 id="hero-heading" class="max-w-3xl text-4xl font-semibold tracking-tight sm:text-6xl" translate="no">
+    <span class="text-gradient">{site.shortName}</span>
+  </h1>
+  <p class="mt-5 max-w-2xl text-lg text-muted sm:text-xl">
+    {site.tagline}
+  </p>
+  <div class="mt-8 flex flex-wrap gap-3">
+    <a
+      href="#dashboard"
+      class="rounded-lg bg-gradient-to-r from-cyan/90 to-violet/80 px-5 py-2.5 text-sm font-medium text-bg shadow-[0_0_24px_rgba(110,196,232,0.25)] hover:brightness-110"
+    >
+      Live dashboard
+    </a>
+    <a
+      href="#projects"
+      class="glass glass-hover rounded-lg px-5 py-2.5 text-sm text-text"
+    >
+      View projects
+    </a>
+  </div>
+</section>

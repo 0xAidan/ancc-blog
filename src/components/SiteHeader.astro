@@ -1,0 +1,36 @@
+---
+import { site } from "../config/site";
+---
+
+<header class="sticky top-0 z-40 border-b border-border/60 bg-bg/70 backdrop-blur-md">
+  <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+    <a
+      href="/"
+      class="group flex flex-col leading-tight"
+      aria-label={`${site.name} home`}
+    >
+      <span class="font-mono text-[10px] uppercase tracking-[0.22em] text-muted">
+        {site.eyebrow}
+      </span>
+      <span class="text-sm font-semibold tracking-wide text-text group-hover:text-cyan sm:text-base">
+        {site.shortName}
+      </span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="flex flex-wrap items-center gap-1 sm:gap-2">
+        {
+          site.nav.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class="rounded-md px-2.5 py-1.5 text-xs text-muted hover:bg-white/5 hover:text-text sm:text-sm"
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>

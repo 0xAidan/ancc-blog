@@ -1,0 +1,77 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import { getProjectBySlug, getVisibleProjects, PROJECTS } from "../../config/projects";
+import { site } from "../../config/site";
+
+export const getStaticPaths = () =>
+  PROJECTS.filter((p) => !p.hidden).map((project) => ({
+    params: { slug: project.slug },
+  }));
+
+const { slug } = Astro.params;
+const project = getProjectBySlug(slug!);
+
+if (!project) {
+  return Astro.redirect("/");
+}
+
+const others = getVisibleProjects().filter((p) => p.id !== project.id);
+---
+
+<BaseLayout
+  title={`${project.name} · ${site.shortName}`}
+  description={project.description}
+  path={`/projects/${project.slug}`}
+>
+  <SiteHeader />
+  <main id="main" class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+    <p class="section-label mb-4">Project</p>
+    <h1 class="text-3xl font-semibold tracking-tight sm:text-5xl">{project.name}</h1>
+    <p class="mt-2 font-mono text-sm text-faint" translate="no">{project.domain}</p>
+    <p class="mt-6 text-lg leading-relaxed text-muted">{project.longDescription}</p>
+    <ul class="mt-6 flex flex-wrap gap-2">
+      {
+        project.tags.map((tag) => (
+          <li class="rounded-full border border-border px-3 py-1 font-mono text-xs uppercase tracking-wider text-faint">
+            {tag}
+          </li>
+        ))
+      }
+    </ul>
+    <div class="mt-10 flex flex-wrap gap-3">
+      <a
+        href={project.url}
+        rel="noopener noreferrer"
+        class="rounded-lg bg-gradient-to-r from-cyan/90 to-violet/80 px-5 py-2.5 text-sm font-medium text-bg"
+      >
+        Open {project.name}
+      </a>
+      <a href="/#projects" class="glass glass-hover rounded-lg px-5 py-2.5 text-sm">
+        All projects
+      </a>
+    </div>
+
+    {
+      others.length > 0 ? (
+        <section class="mt-16 border-t border-border/50 pt-10" aria-labelledby="more-projects">
+          <h2 id="more-projects" class="section-label mb-4">
+            More projects
+          </h2>
+          <ul class="space-y-3">
+            {others.map((p) => (
+              <li>
+                <a class="text-cyan hover:underline" href={`/projects/${p.slug}`}>
+                  {p.name}
+                </a>
+                <span class="text-faint"> — {p.description}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null
+    }
+  </main>
+  <SiteFooter />
+</BaseLayout>

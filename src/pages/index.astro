@@ -1,0 +1,21 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import Hero from "../components/Hero.astro";
+import Dashboard from "../components/Dashboard.astro";
+import ProjectsGrid from "../components/ProjectsGrid.astro";
+import About from "../components/About.astro";
+import { site } from "../config/site";
+---
+
+<BaseLayout title={site.name} description={site.description} path="/">
+  <SiteHeader />
+  <main id="main">
+    <Hero />
+    <Dashboard />
+    <ProjectsGrid />
+    <About />
+  </main>
+  <SiteFooter />
+</BaseLayout>

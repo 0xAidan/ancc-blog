@@ -1,0 +1,48 @@
+---
+import "../styles/global.css";
+import { site } from "../config/site";
+
+type Props = {
+  title?: string;
+  description?: string;
+  path?: string;
+};
+
+const {
+  title = site.name,
+  description = site.description,
+  path = "/",
+} = Astro.props;
+
+const canonical = new URL(path, site.url).toString();
+const ogImage = new URL("/og.png", site.url).toString();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:site_name" content={site.name} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="generator" content={Astro.generator} />
+  </head>
+  <body class="relative overflow-x-hidden">
+    <div class="pointer-events-none fixed inset-0 grid-bg -z-10" aria-hidden="true"></div>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <slot />
+  </body>
+</html>
