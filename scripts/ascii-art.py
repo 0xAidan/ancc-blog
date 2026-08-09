@@ -65,31 +65,53 @@ def load_image(path: Path) -> Image.Image:
         raise SystemExit(f"Could not open {path}: {error}") from error
 
     # iPhone photos carry rotation in EXIF; bake it in so the dog is upright.
-    return ImageOps.exif_transpose(image).convert("RGB")
+    image = ImageOps.exif_transpose(image)
+
+    # A cut-out subject carries its shape in the alpha channel. Keep that separate
+    # so transparent areas stay blank instead of collapsing to black pixels.
+    alpha = image.getchannel("A") if "A" in image.getbands() else None
+    return image.convert("RGB"), alpha
+
+
+def trim_to_subject(image: Image.Image, alpha: Image.Image) -> tuple[Image.Image, Image.Image]:
+    """Crop away fully transparent margins so the subject fills the output."""
+    box = alpha.getbbox()
+    if box is None:
+        return image, alpha
+    return image.crop(box), alpha.crop(box)
 
 
 def build_grid(
     image: Image.Image,
+    alpha: Image.Image | None,
     cols: int,
     cell_ratio: float,
     contrast_cutoff: float,
     invert: bool,
-) -> Image.Image:
+) -> tuple[Image.Image, Image.Image | None]:
     """Downsample the photo to one grayscale value per character cell."""
     # Character cells are taller than they are wide, so scale rows by that ratio
     # to keep the rendered PNG the same shape as the source photo.
     rows = max(1, round(image.height / image.width * cols * cell_ratio))
-    gray = image.convert("L").resize((cols, rows), Image.Resampling.LANCZOS)
+    size = (cols, rows)
+    gray = image.convert("L").resize(size, Image.Resampling.LANCZOS)
+    mask = alpha.resize(size, Image.Resampling.LANCZOS) if alpha is not None else None
 
     if contrast_cutoff > 0:
-        gray = ImageOps.autocontrast(gray, cutoff=contrast_cutoff)
+        # Measure contrast from the subject alone, so empty space cannot skew the range.
+        gray = ImageOps.autocontrast(gray, cutoff=contrast_cutoff, mask=mask)
     if invert:
         gray = ImageOps.invert(gray)
 
-    return gray
+    return gray, mask
 
 
-def grid_to_rows(grid: Image.Image, charset: str, threshold: int) -> list[str]:
+def grid_to_rows(
+    grid: Image.Image,
+    mask: Image.Image | None,
+    charset: str,
+    threshold: int,
+) -> list[str]:
     """Map each cell's brightness onto a character, blanking anything below threshold."""
     last = len(charset) - 1
     rows: list[str] = []
@@ -97,6 +119,9 @@ def grid_to_rows(grid: Image.Image, charset: str, threshold: int) -> list[str]:
     for y in range(grid.height):
         line = []
         for x in range(grid.width):
+            if mask is not None and mask.getpixel((x, y)) < 128:
+                line.append(" ")
+                continue
             level = grid.getpixel((x, y))
             line.append(" " if level < threshold else charset[level * last // 255])
         rows.append("".join(line))
@@ -176,7 +201,17 @@ def parse_args() -> argparse.Namespace:
         help="Autocontrast cutoff percent; 0 disables.",
     )
     parser.add_argument("--invert", action="store_true", help="Invert light and dark.")
+    parser.add_argument(
+        "--trim",
+        action="store_true",
+        help="Crop transparent margins off a cut-out subject.",
+    )
     parser.add_argument("--txt", action="store_true", help="Also write a .txt of the characters.")
+    parser.add_argument(
+        "--optimize",
+        action="store_true",
+        help="Palette-compress the PNG; roughly a third the size for single-colour art.",
+    )
     return parser.parse_args()
 
 
@@ -196,9 +231,12 @@ def main() -> int:
     ascent, descent = font.getmetrics()
     cell_ratio = cell_w / (ascent + descent)
 
-    image = load_image(args.input)
-    grid = build_grid(image, args.cols, cell_ratio, args.contrast, args.invert)
-    rows = grid_to_rows(grid, CHARSETS[args.charset], args.threshold)
+    image, alpha = load_image(args.input)
+    if args.trim and alpha is not None:
+        image, alpha = trim_to_subject(image, alpha)
+
+    grid, mask = build_grid(image, alpha, args.cols, cell_ratio, args.contrast, args.invert)
+    rows = grid_to_rows(grid, mask, CHARSETS[args.charset], args.threshold)
 
     canvas = render_png(
         rows,
@@ -209,7 +247,9 @@ def main() -> int:
         args.transparent,
         args.shade,
     )
-    canvas.save(output)
+    if args.optimize:
+        canvas = canvas.quantize(colors=32, method=Image.Quantize.FASTOCTREE)
+    canvas.save(output, optimize=True)
 
     if args.txt:
         text_path = output.with_suffix(".txt")
