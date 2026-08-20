@@ -1,138 +1,69 @@
 @import "tailwindcss";
-@import "@fontsource/space-grotesk/400.css";
-@import "@fontsource/space-grotesk/500.css";
-@import "@fontsource/space-grotesk/600.css";
-@import "@fontsource/space-grotesk/700.css";
-@import "@fontsource/jetbrains-mono/400.css";
-@import "@fontsource/jetbrains-mono/500.css";
-
-@theme {
-  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
-
-  --color-bg: #0a0a0c;
-  --color-bg-elevated: #121218;
-  --color-panel: rgba(18, 18, 24, 0.72);
-  --color-border: rgba(110, 196, 232, 0.18);
-  --color-border-strong: rgba(110, 196, 232, 0.35);
-  --color-text: #e8ecf5;
-  --color-muted: rgba(232, 236, 245, 0.55);
-  --color-faint: rgba(232, 236, 245, 0.35);
-  --color-cyan: #6ec4e8;
-  --color-violet: #8b7cf8;
-  --color-success: #7fd99a;
-  --color-danger: #f07178;
-  --color-warn: #e6c07b;
-}
 
 @layer base {
   html {
-    scroll-behavior: smooth;
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   body {
-    @apply bg-bg text-text font-sans antialiased;
-    background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(110, 196, 232, 0.12), transparent),
-      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(139, 124, 248, 0.08), transparent);
-    min-height: 100dvh;
-  }
-
-  ::selection {
-    background: rgba(110, 196, 232, 0.35);
-  }
-
-  a {
-    @apply transition-colors;
+    margin: 0;
+    min-height: 100vh;
+    background: #c0c0c0;
+    color: #000;
+    font-family: Times, "Times New Roman", serif;
   }
 
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-cyan;
+    outline: 1px dotted #000;
   }
 }
 
-@layer components {
-  .skip-link {
-    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-bg-elevated focus:px-4 focus:py-2 focus:text-sm focus:text-cyan focus:shadow-lg;
-  }
-
-  .glass {
-    background: var(--color-panel);
-    border: 1px solid var(--color-border);
-    backdrop-filter: blur(12px);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
-  }
-
-  .glass-hover {
-    @apply transition duration-300;
-  }
-
-  .glass-hover:hover {
-    border-color: var(--color-border-strong);
-    box-shadow:
-      0 0 0 1px rgba(110, 196, 232, 0.12) inset,
-      0 0 32px rgba(110, 196, 232, 0.08);
-  }
-
-  .grid-bg {
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 48px 48px;
-    mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black, transparent);
-  }
-
-  .text-gradient {
-    background: linear-gradient(120deg, #e8ecf5 0%, #6ec4e8 45%, #8b7cf8 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  .section-label {
-    @apply font-mono text-xs uppercase tracking-[0.2em] text-muted;
-  }
-
-  .stat-num {
-    @apply font-mono tabular-nums tracking-tight;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .status-dot {
-    @apply inline-block h-2 w-2 rounded-full;
-  }
-
-  .status-dot[data-status="up"] {
-    background: var(--color-success);
-    box-shadow: 0 0 8px rgba(127, 217, 154, 0.6);
-  }
-
-  .status-dot[data-status="degraded"] {
-    background: var(--color-warn);
-    box-shadow: 0 0 8px rgba(230, 192, 123, 0.5);
-  }
-
-  .status-dot[data-status="down"] {
-    background: var(--color-danger);
-    box-shadow: 0 0 8px rgba(240, 113, 120, 0.45);
-  }
-
-  .skeleton {
-    @apply animate-pulse rounded bg-white/5;
-  }
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 8px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+.skip-link:focus {
+  left: 8px;
+  background: #fff;
+  color: #000;
+  padding: 4px 8px;
+}
 
-  .skeleton {
-    animation: none;
-  }
+.landing {
+  padding: 80px 16px 24px;
+  text-align: center;
+}
 
-  .glass-hover {
-    transition: none;
-  }
+.landing h1 {
+  margin: 0 0 28px;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.contact-button {
+  display: inline-block;
+  background: #d4d0c8;
+  color: #000;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  text-decoration: none;
+  padding: 4px 18px;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-right: 2px solid #404040;
+  border-bottom: 2px solid #404040;
+}
+
+.contact-button:hover,
+.contact-button:focus-visible {
+  background: #e0dcd4;
+}
+
+.contact-button:active {
+  border-top: 2px solid #404040;
+  border-left: 2px solid #404040;
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
 }

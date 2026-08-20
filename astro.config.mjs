@@ -4,7 +4,17 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   site: "https://shermandavison.com",
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      filter: (page) => new URL(page).pathname === "/",
+    }),
+  ],
+  redirects: {
+    "/tools": "/",
+    "/tools/odds-converter": "/",
+    "/projects/ditto": "/",
+    "/projects/golf-model": "/",
+  },
   vite: {
     plugins: [tailwindcss()],
     server: {

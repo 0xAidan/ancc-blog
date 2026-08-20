@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /projects/
+Disallow: /tools
+Disallow: /tools/
 
 Sitemap: https://shermandavison.com/sitemap-index.xml

@@ -15,7 +15,6 @@ const {
 } = Astro.props;
 
 const canonical = new URL(path, site.url).toString();
-const ogImage = new URL("/og.png", site.url).toString();
 ---
 
 <!doctype html>
@@ -23,7 +22,7 @@ const ogImage = new URL("/og.png", site.url).toString();
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="light" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -32,16 +31,13 @@ const ogImage = new URL("/og.png", site.url).toString();
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content={ogImage} />
     <meta property="og:site_name" content={site.name} />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImage} />
     <meta name="generator" content={Astro.generator} />
   </head>
-  <body class="relative overflow-x-hidden">
-    <div class="pointer-events-none fixed inset-0 grid-bg -z-10" aria-hidden="true"></div>
+  <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <slot />
   </body>
