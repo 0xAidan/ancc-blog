@@ -1,22 +1,14 @@
 export const site = {
-  name: "Sherman-Davison Business Solutions",
-  shortName: "Sherman-Davison",
+  name: "Sherman Davison Business Solutions",
+  shortName: "Sherman Davison",
   eyebrow: "Business Solutions",
   tagline: "Projects, live systems, and tools that take themselves seriously.",
-  description:
-    "Sherman-Davison Business Solutions — live project dashboards, golf analytics, autonomous trading systems, and experimental tools.",
+  description: "Sherman Davison Business Solutions.",
   domain: "shermandavison.com",
   url: "https://shermandavison.com",
-  email: null as string | null,
-  nav: [
-    { label: "Dashboard", href: "/#dashboard" },
-    { label: "Projects", href: "/#projects" },
-    { label: "Tools", href: "/tools" },
-    { label: "About", href: "/#about" },
-  ],
-  social: [
-    { label: "GitHub", href: "https://github.com/0xAidan", handle: "github.com/0xAidan" },
-  ],
+  email: "aidannuge@gmail.com",
+  nav: [] as { label: string; href: string }[],
+  social: [] as { label: string; href: string; handle: string }[],
   footer: {
     copyrightYear: 2026,
     note: "Informal. Serious. Shipping.",
